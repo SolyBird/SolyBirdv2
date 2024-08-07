@@ -78,7 +78,7 @@
 		function saveScoreInLeaderboard(name, score) {
             PlayFabClientSDK.UpdatePlayerStatistics({
                 Statistics: [{
-                    StatisticName: "New Leaderboard", // Ensure this matches the leaderboard name in PlayFab
+                    StatisticName: "LatestLeaderboard", // Ensure this matches the leaderboard name in PlayFab
                     Value: score
                 }]
             }, function(result, error) {
@@ -121,7 +121,7 @@
         // Example function to retrieve and display scores (for admin use)
         function getLeaderboard() {
             PlayFabClientSDK.GetLeaderboard({
-                StatisticName: "New Leaderboard",
+                StatisticName: "LatestLeaderboard",
                 StartPosition: 0,
                 MaxResultsCount: 10
             }, function(result, error) {
