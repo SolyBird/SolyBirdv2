@@ -12,166 +12,19 @@
     <script type="text/javascript" src="api/scoreboard.js"></script>
     <script type="text/javascript" src="api/scoreboardUtils.js"></script>
     <link rel="stylesheet" type="text/css" href="api/api.css">
-<!-- Include PlayFab SDK -->
-<script src="https://download.playfab.com/PlayFabClientApi.js"></script>
-
-<script type="text/javascript">
-        // Initialize PlayFab with your Title ID
-        PlayFab.settings.titleId = "BB7FC";
-        let isLoggedIn = false; // Boolean variable to track login status
-
-        // Function to log in to PlayFab (for simplicity, using custom ID)
-        function loginPlayer(username, callback) {
-            PlayFabClientSDK.LoginWithCustomID({
-                TitleId: PlayFab.settings.titleId,
-                CustomId: "Player_" + new Date().getTime(), // Unique ID for each session
-                CreateAccount: true,
-                Username: username // Set the username as well
-            }, function(result, error) {
-                if (result !== null) {
-                    console.log("Login successful!");
-                    updateDisplayName(username, function() {
-                        if (callback) callback();
-                    });
-                    isLoggedIn = true;
-                } else {
-                    console.error("Login failed", error);
-                }
-            });
-        }
-
-        // Update the display name for the logged-in user
-        function updateDisplayName(displayName, callback) {
-            var randomNumber = Math.floor(Math.random() * 1000);
-            var usernameWithRandom = displayName + "_" + randomNumber; // Append random number to username
-
-            PlayFabClientSDK.UpdateUserTitleDisplayName({
-                DisplayName: displayName
-            }, function(result, error) {
-                if (result !== null) {
-                    console.log("Display name updated successfully!");
-                    if (callback) callback();
-                } else {
-                    console.error("Failed to update display name", error);
-                }
-            });
-        }
-
-        // Save player scores to PlayFab
-        function saveScores(name,scores,score) {
-            var scoresJson = JSON.stringify(scores);
-
-            PlayFabClientSDK.UpdateUserData({
-                Data: {
-                    "Scores": scoresJson
-                }
-            }, function(result, error) {
-                if (result !== null) {
-                    console.log("Key-Scores saved successfully!");
-					 saveScoreInLeaderboard(name, score);
-					
-                } else {
-                    console.error("Failed to save scores", error);
-                }
-            });
-        }
-		function saveScoreInLeaderboard(name, score) {
-            PlayFabClientSDK.UpdatePlayerStatistics({
-                Statistics: [{
-                    StatisticName: "LatestLeaderboard", // Ensure this matches the leaderboard name in PlayFab
-                    Value: score
-                }]
-            }, function(result, error) {
-                if (result !== null) {
-                    console.log("Score saved successfully!");
-					
-                } else {
-                    console.error("Failed to save score", error);
-                }
-            });
-        }
-       // Retrieve player scores from PlayFab
-        function getScores(callback) {
-            PlayFabClientSDK.GetUserData({
-                Keys: ["Scores"]
-            }, function(result, error) {
-                if (result !== null) {
-                    if (result.data.Data.Scores) {
-                        var scores = JSON.parse(result.data.Data.Scores.Value);
-                        console.log("Scores retrieved:", scores);
-                        callback(scores);
-                    } else {
-                        console.warn("Scores key not found in user data.");
-                        callback([]);
-                    }
-                } else {
-                    console.error("Failed to retrieve scores", error);
-                    callback([]);
-                }
-            });
-        }
-        // Example function to save a new score and retrieve all scores
-        function saveAndRetrieveScores(name,newScore) {
-            getScores(function(existingScores) {
-                existingScores.push(newScore);
-                saveScores(name,existingScores,newScore);
-            });
-        }
-
-        // Example function to retrieve and display scores (for admin use)
-        function getLeaderboard() {
-            PlayFabClientSDK.GetLeaderboard({
-                StatisticName: "LatestLeaderboard",
-                StartPosition: 0,
-                MaxResultsCount: 10
-            }, function(result, error) {
-                if (result !== null) {
-                    console.log("Leaderboard retrieved:", result.Leaderboard);
-                    // Display the leaderboard data in your admin interface
-                    result.Leaderboard.forEach(entry => {
-                        console.log(entry.Position + ": " + entry.DisplayName + " - " + entry.StatValue);
-                    });
-                } else {
-                    console.error("Failed to retrieve leaderboard", error);
-                }
-            });
-        }
 
 <!-- AnalyticsCode -->
     <script type="text/javascript">
         
         window.startGame = function(){
-            console.log("startGame");
+            console.log("startGame")
         }
 
         window.endGame = function(name, score, coin){
-            var username = document.getElementById("username").value; // Get the entered username
-            console.log("endGame. Username: " + username);
-            window.SCORE_DATA.name = username;
+            console.log("endGame. Score: "+score+", coins: "+coin+", Name: "+name);
+            window.SCORE_DATA.name = name;
             window.SCORE_DATA.score = score;
-
-            if (!isLoggedIn) {
-                // Player is not logged in, log in and save score
-                loginPlayer(username, function() {
-                    saveAndRetrieveScores(username,window.SCORE_DATA.score);
-                });
-            } else {
-                // Player is already logged in, directly save score
-                saveAndRetrieveScores(username,window.SCORE_DATA.score);
-            }
-			
-			/*
-			 if (!isLoggedIn) {
-                // Player is not logged in, log in and save score
-                loginPlayer(username, function() {
-                   saveScoreInLeaderboard(username, window.SCORE_DATA.score);
-                });
-            } else {
-                // Player is already logged in, directly save score
-               saveScoreInLeaderboard(username, window.SCORE_DATA.score);
-            }
-			*/
-       }
+        }
 
     </script>
 
@@ -301,9 +154,9 @@
         
         <div class="api-container">
             <div>
-                <div class="header">INPUT YOUR TELEGRAM NAME</div>
+                <div class="header">INPUT YOUR NAME</div>
                 <input id="username" type="text" name="username"/>
-                <div class="err-msg">PLEASE INPUT YOUR TELEGRAM NAME</div>
+                <div class="err-msg">PLEASE INPUT YOUR NAME</div>
                 <div class="btn-submit" onclick="window.getUsername()">SUBMIT</div>
             </div>
         </div>
